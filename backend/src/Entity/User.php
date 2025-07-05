@@ -4,35 +4,30 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups( ['auth_registration'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "First name is required.")]
-    #[Assert\Regex(
-        pattern: '/^[\p{L}\s\-]+$/u',
-        message: 'The first name can only contain letters, spaces and hyphens.'
-    )]
+    #[Groups( ['auth_registration'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "Last name is required.")]
-    #[Assert\Regex(
-        pattern: '/^[\p{L}\s\-]+$/u',
-        message: 'The last name can only contain letters, spaces and hyphens.'
-    )]
+    #[Groups( ['auth_registration'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "Email is required")]
-    #[Assert\Email(message: "The email {{ value }} is not a valid email.")]
+    #[Groups(['auth_registration'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
@@ -44,8 +39,30 @@ class User
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $expirationDate = null;
 
-    #[ORM\Column]
-    private ?bool $isVerified = null;
+    #[ORM\Column(options: ['default'=>false])]
+    private ?bool $isVerified = false;
+
+
+    //security method
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+
+    public function getRoles(): array
+    {
+        return ['ROLE_USER'];
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->hashPassword;
+    }
+
+    public function eraseCredentials(): void
+    {
+
+    }
 
     public function getId(): ?int
     {
