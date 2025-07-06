@@ -38,7 +38,6 @@ final class AuthController extends AbstractController
         EntityManagerInterface $em,
         UserRepository $userRepository,
         UserPasswordHasherInterface $hasher,
-        MailerInterface $mailer,
         EmailSender $emailSender
     ): JsonResponse
     {
@@ -87,7 +86,8 @@ final class AuthController extends AbstractController
         UserRepository $userRepository,
         UserAuthenticatorInterface $userAuthenticator,
         #[Autowire(service: 'security.authenticator.json_login.main')]
-        JsonLoginAuthenticator $authenticator
+        JsonLoginAuthenticator $authenticator,
+        EmailSender $emailSender
     ): JsonResponse
     {
         $userData = $serialiser->deserialize($request->getContent(), VerifyEmailRequest::class, 'json');
@@ -111,6 +111,14 @@ final class AuthController extends AbstractController
         $user->setVerificationCode(null);
         $user->setExpirationDate(null);
 
+        $emailReplacer = ['firstName'=>$user->getFirstName()];
+        $emailSender->send(
+            template: 'succesVerification.html',
+            replacer: $emailReplacer,
+            sendTo: $user->getEmail(),
+            subject: 'kanban - verification email'
+        );
+
         //no persist is needed because the resource is handle by the entity manager with repository
         $em->flush();
         return $userAuthenticator->authenticateUser(
@@ -128,6 +136,7 @@ final class AuthController extends AbstractController
         EntityManagerInterface $em,
         UserRepository $userRepository,
         MailerInterface $mailer,
+        EmailSender $emailSender
     ): JsonResponse
     {
         $userData = $serializer->deserialize($request->getContent(), ResendCodeRequest::class, 'json');
@@ -146,6 +155,14 @@ final class AuthController extends AbstractController
         $newCode = (string) random_int(100000, 999999);
         $user->setVerificationCode($newCode);
         $user->setExpirationDate(new DateTimeImmutable('+15 minutes'));
+
+        $emailReplacer = ['firstName'=>$user->getFirstName(), 'verificationCode'=>$user->getVerificationCode()];
+        $emailSender->send(
+            template: 'resendVerification.html',
+            replacer: $emailReplacer,
+            sendTo: $user->getEmail(),
+            subject: 'kanban - verification email'
+        );
 
         $em->flush();
 

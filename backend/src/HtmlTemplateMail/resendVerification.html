@@ -2,8 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Verify Your Email</title>
+        <title>Resend verification code</title>
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -40,8 +39,10 @@
     <body>
         <div class="container">
             <h2>Hello {{ firstName }} 👋</h2>
-            <p>Thank you for registering on <strong>Kanban</strong>.</p>
-            <p>To verify your email address, please use the following code:</p>
+            <p>
+                Here is your new verification code for your
+                <strong>Kanban</strong> account:
+            </p>
             <div class="code">{{ verificationCode }}</div>
             <p>This code will expire in 15 minutes.</p>
             <div class="footer">
