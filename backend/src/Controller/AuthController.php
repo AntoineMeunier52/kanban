@@ -10,14 +10,18 @@ use App\Utils\FormatValidatorError;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Authenticator\JsonLoginAuthenticator;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 
 use App\Entity\User;
 
@@ -68,7 +72,10 @@ final class AuthController extends AbstractController
         SerializerInterface $serialiser,
         ValidatorInterface $validator,
         EntityManagerInterface $em,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        UserAuthenticatorInterface $userAuthenticator,
+        #[Autowire(service: 'security.authenticator.json_login.main')]
+        JsonLoginAuthenticator $authenticator
     ): JsonResponse
     {
         $userData = $serialiser->deserialize($request->getContent(), VerifyEmailRequest::class, 'json');
@@ -94,7 +101,11 @@ final class AuthController extends AbstractController
 
         //no persist is needed because the resource is handle by the entity manager with repository
         $em->flush();
-        return new JsonResponse(['message'=> 'Email verified succesfully'], Response::HTTP_OK);
+        return $userAuthenticator->authenticateUser(
+            $user,
+            $authenticator,
+            $request
+        );
     }
 
     #[Route('/resend-code', name: 'auth_resend_code', methods: ['POST'])]
@@ -129,6 +140,21 @@ final class AuthController extends AbstractController
         return new JsonResponse(['message'=> 'New verification code send'], Response::HTTP_OK);
     }
 
-    #[Route('/login', name:'auth_login', methods: ['POST'])]
-    public function
+    #[Route('/login', name: 'auth_login', methods: ['POST'])]
+    public function login(): void
+    {
+        // Symfony Security intercepte cette route via json_login
+    }
+
+    #[Route('/logout', name: 'auth_logout', methods: ['POST'])]
+    public function logout(): void
+    {
+        // Symfony Security intercepte cette route via json_login
+    }
+
+    #[Route('/logout/success', name: 'auth_logout_success', methods: ['GET'])]
+    public function logoutSuccess(): JsonResponse
+    {
+        return new JsonResponse(['message' => 'Logged out successfully.'], Response::HTTP_OK);
+    }
 }
