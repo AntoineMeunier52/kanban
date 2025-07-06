@@ -6,7 +6,9 @@ use App\Dto\Auth\RegisterRequest;
 use App\Dto\Auth\ResendCodeRequest;
 use App\Dto\Auth\VerifyEmailRequest;
 use App\Repository\UserRepository;
+use App\Service\EmailSender;
 use App\Utils\FormatValidatorError;
+use App\Utils\SendEmail;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,13 +17,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authenticator\JsonLoginAuthenticator;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
-use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 
 use App\Entity\User;
 
@@ -36,7 +38,8 @@ final class AuthController extends AbstractController
         EntityManagerInterface $em,
         UserRepository $userRepository,
         UserPasswordHasherInterface $hasher,
-        MailerInterface $mailer
+        MailerInterface $mailer,
+        EmailSender $emailSender
     ): JsonResponse
     {
         $user = $serializer->deserialize($request->getContent(), RegisterRequest::class, 'json');
@@ -57,7 +60,16 @@ final class AuthController extends AbstractController
         $userObj->setHashPassword($hasher->hashPassword($userObj, $user->password));
         $userObj->setVerificationCode((string) random_int(100000, 999999));
         $userObj->setIsVerified(false);
-        $userObj->setExpirationDate(new \DateTimeImmutable('+15 minutes'));
+        $userObj->setExpirationDate(new DateTimeImmutable('+15 minutes'));
+
+        $emailReplacer = ['firstName'=>$userObj->getFirstName(), 'verificationCode'=>$userObj->getVerificationCode()];
+        $emailSender->send(
+            template: 'emailVerification.html',
+            replacer: $emailReplacer,
+            sendTo: $userObj->getEmail(),
+            subject: 'kanban - verification email'
+        );
+
 
         $em->persist($userObj);
         $em->flush();
@@ -149,7 +161,7 @@ final class AuthController extends AbstractController
     #[Route('/logout', name: 'auth_logout', methods: ['POST'])]
     public function logout(): void
     {
-        // Symfony Security intercepte cette route via json_login
+        // Symfony Security intercepte cette route via json_logout
     }
 
     #[Route('/logout/success', name: 'auth_logout_success', methods: ['GET'])]
