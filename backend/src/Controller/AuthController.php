@@ -3,8 +3,11 @@
 namespace App\Controller;
 
 use App\Dto\Auth\RegisterRequest;
+use App\Dto\Auth\ResendCodeRequest;
 use App\Dto\Auth\VerifyEmailRequest;
 use App\Repository\UserRepository;
+use App\Utils\FormatValidatorError;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -36,11 +39,7 @@ final class AuthController extends AbstractController
 
         $errors = $validator->validate($user);
         if ($errors->count() > 0 && $request->getContent()) {
-            $errorMessage = [];
-            foreach ($errors as $error) {
-                $errorMessage[] = $error->getMessage();
-            }
-            return new JsonResponse(['errors'=> $errorMessage], Response::HTTP_BAD_REQUEST, []);
+            return FormatValidatorError::sendMessages($errors);
         }
 
         if ($userRepository->findOneBy(['email' => $user->email])) {
@@ -76,11 +75,7 @@ final class AuthController extends AbstractController
 
         $errors = $validator->validate($userData);
         if ($errors->count() > 0) {
-            $message = [];
-            foreach ($errors as $error) {
-                $message[] = $error->getMessage();
-            }
-            return new JsonResponse(['errors'=>$message], Response::HTTP_BAD_REQUEST);
+            return FormatValidatorError::sendMessages($errors);
         }
 
         $user = $userRepository->findOneBy(['email'=> $userData->email]);
@@ -89,7 +84,7 @@ final class AuthController extends AbstractController
             return new JsonResponse(['message'=>'Invalid email or verification code.'], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($user->getExpirationDate() < new \DateTimeImmutable()) {
+        if ($user->getExpirationDate() < new DateTimeImmutable()) {
             return new JsonResponse(['message'=>'Verification code Expired.'], Response::HTTP_GONE);
         }
 
@@ -101,4 +96,39 @@ final class AuthController extends AbstractController
         $em->flush();
         return new JsonResponse(['message'=> 'Email verified succesfully'], Response::HTTP_OK);
     }
+
+    #[Route('/resend-code', name: 'auth_resend_code', methods: ['POST'])]
+    public function resendVerificationCode(
+        Request $request,
+        SerializerInterface $serializer,
+        ValidatorInterface $validator,
+        EntityManagerInterface $em,
+        UserRepository $userRepository,
+        MailerInterface $mailer,
+    ): JsonResponse
+    {
+        $userData = $serializer->deserialize($request->getContent(), ResendCodeRequest::class, 'json');
+
+        $errors = $validator->validate($userData);
+        if ($errors->count() > 0) {
+            return FormatValidatorError::sendMessages($errors);
+        }
+
+        $user = $userRepository->findOneBy(['email'=> $userData->email]);
+
+        if (!$user || $user->isVerified()) {
+            return new JsonResponse(['message'=>'User not found or already verified.']);
+        }
+
+        $newCode = (string) random_int(100000, 999999);
+        $user->setVerificationCode($newCode);
+        $user->setExpirationDate(new DateTimeImmutable('+15 minutes'));
+
+        $em->flush();
+
+        return new JsonResponse(['message'=> 'New verification code send'], Response::HTTP_OK);
+    }
+
+    #[Route('/login', name:'auth_login', methods: ['POST'])]
+    public function
 }
