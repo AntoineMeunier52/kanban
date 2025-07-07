@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -41,6 +43,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(options: ['default'=>false])]
     private ?bool $isVerified = false;
+
+    /**
+     * @var Collection<int, BoardMember>
+     */
+    #[ORM\OneToMany(targetEntity: BoardMember::class, mappedBy: 'userId')]
+    private Collection $boardMember;
+
+    /**
+     * @var Collection<int, Board>
+     */
+    #[ORM\OneToMany(targetEntity: Board::class, mappedBy: 'ownerId')]
+    private Collection $boardsId;
+
+    public function __construct()
+    {
+        $this->boardMember = new ArrayCollection();
+        $this->boardsId = new ArrayCollection();
+    }
 
 
     //security method
@@ -149,6 +169,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BoardMember>
+     */
+    public function getBoardMember(): Collection
+    {
+        return $this->boardMember;
+    }
+
+    public function addBoardMember(BoardMember $boardId): static
+    {
+        if (!$this->boardMember->contains($boardId)) {
+            $this->boardMember->add($boardId);
+            $boardId->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBoardId(BoardMember $boardMemberId): static
+    {
+        if ($this->boardMember->removeElement($boardMemberId)) {
+            // set the owning side to null (unless already changed)
+            if ($boardMemberId->getUser() === $this) {
+                $boardMemberId->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Board>
+     */
+    public function getBoardsId(): Collection
+    {
+        return $this->boardsId;
+    }
+
+    public function addBoardsId(Board $boardsId): static
+    {
+        if (!$this->boardsId->contains($boardsId)) {
+            $this->boardsId->add($boardsId);
+            $boardsId->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBoardsId(Board $boardsId): static
+    {
+        if ($this->boardsId->removeElement($boardsId)) {
+            // set the owning side to null (unless already changed)
+            if ($boardsId->getOwner() === $this) {
+                $boardsId->setOwner(null);
+            }
+        }
 
         return $this;
     }
