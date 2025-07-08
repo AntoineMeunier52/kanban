@@ -17,19 +17,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups( ['auth_registration'])]
+    #[Groups( ['auth_registration', 'get_details_board'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups( ['auth_registration'])]
+    #[Groups( ['auth_registration', 'get_details_board'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups( ['auth_registration'])]
+    #[Groups( ['auth_registration', 'get_details_board'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['auth_registration'])]
+    #[Groups(['auth_registration', 'get_details_board'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
@@ -47,19 +47,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, BoardMember>
      */
-    #[ORM\OneToMany(targetEntity: BoardMember::class, mappedBy: 'userId')]
-    private Collection $boardMember;
+    #[ORM\OneToMany(targetEntity: BoardMember::class, mappedBy: 'user')]
+    private Collection $memberships;
 
     /**
      * @var Collection<int, Board>
      */
-    #[ORM\OneToMany(targetEntity: Board::class, mappedBy: 'ownerId')]
-    private Collection $boardsId;
+    #[ORM\OneToMany(targetEntity: Board::class, mappedBy: 'owner')]
+    private Collection $ownedBoards;
 
     public function __construct()
     {
-        $this->boardMember = new ArrayCollection();
-        $this->boardsId = new ArrayCollection();
+        $this->memberships = new ArrayCollection();
+        $this->ownedBoards = new ArrayCollection();
     }
 
 
@@ -173,30 +173,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    // -------------------RELATION-----------------------------------
+
     /**
      * @return Collection<int, BoardMember>
      */
-    public function getBoardMember(): Collection
+    public function getMemberships(): Collection
     {
-        return $this->boardMember;
+        return $this->memberships;
     }
 
-    public function addBoardMember(BoardMember $boardId): static
+    public function addMembership(BoardMember $membership): static
     {
-        if (!$this->boardMember->contains($boardId)) {
-            $this->boardMember->add($boardId);
-            $boardId->setUser($this);
+        if (!$this->memberships->contains($membership)) {
+            $this->memberships->add($membership);
+            $membership->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeBoardId(BoardMember $boardMemberId): static
+    public function removeMembership(BoardMember $membership): static
     {
-        if ($this->boardMember->removeElement($boardMemberId)) {
+        if ($this->memberships->removeElement($membership)) {
             // set the owning side to null (unless already changed)
-            if ($boardMemberId->getUser() === $this) {
-                $boardMemberId->setUser(null);
+            if ($membership->getUser() === $this) {
+                $membership->setUser(null);
             }
         }
 
@@ -206,27 +208,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, Board>
      */
-    public function getBoardsId(): Collection
+    public function getOwnedBoards(): Collection
     {
-        return $this->boardsId;
+        return $this->ownedBoards;
     }
 
-    public function addBoardsId(Board $boardsId): static
+    public function addOwnedBoard(Board $board): static
     {
-        if (!$this->boardsId->contains($boardsId)) {
-            $this->boardsId->add($boardsId);
-            $boardsId->setOwner($this);
+        if (!$this->ownedBoards->contains($board)) {
+            $this->ownedBoards->add($board);
+            $board->setOwner($this);
         }
 
         return $this;
     }
 
-    public function removeBoardsId(Board $boardsId): static
+    public function removeOwnedBoard(Board $board): static
     {
-        if ($this->boardsId->removeElement($boardsId)) {
+        if ($this->ownedBoards->removeElement($board)) {
             // set the owning side to null (unless already changed)
-            if ($boardsId->getOwner() === $this) {
-                $boardsId->setOwner(null);
+            if ($board->getOwner() === $this) {
+                $board->setOwner(null);
             }
         }
 

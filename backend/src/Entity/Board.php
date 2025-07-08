@@ -6,6 +6,7 @@ use App\Repository\BoardRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BoardRepository::class)]
 class Board
@@ -13,19 +14,23 @@ class Board
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['get_details_board', 'get_board'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['get_details_board', 'get_board'])]
     private ?string $name = null;
 
-    #[ORM\ManyToOne(inversedBy: 'boardsId')]
+    #[ORM\ManyToOne(inversedBy: 'ownedBoards')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['get_details_board'])]
     private ?User $owner = null;
 
     /**
      * @var Collection<int, BoardMember>
      */
-    #[ORM\OneToMany(targetEntity: BoardMember::class, mappedBy: 'boardId')]
+    #[ORM\OneToMany(targetEntity: BoardMember::class, mappedBy: 'board')]
+    #[Groups(['get_details_board'])]
     private Collection $boardMembers;
 
     public function __construct()
@@ -54,6 +59,8 @@ class Board
     {
         return $this->owner;
     }
+
+    // -------------------RELATION-----------------------------------
 
     public function setOwner(?User $owner): static
     {

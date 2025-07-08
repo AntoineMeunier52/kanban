@@ -1,0 +1,56 @@
+I got it KANBAN ENDPOINT:
+
+
+Auth
+
+POST	/api/auth/login             OK
+POST	/api/auth/logout            OK
+POST	/api/auth/register          OK
+POST	/api/auth/verify-email      OK
+POST	/api/auth/resend-code       OK
+
+----------------------------------------
+USER
+
+GET		/api/user/me                OK
+
+----------------------------------------
+BOARD
+GET		/api/boards                 OK
+POST	/api/boards                 OK
+GET		/api/boards/{id}            OK    (give list with card)
+PATCH	/api/boards/{id}                (que le nom a changer)
+DELETE	/api/boards/{id}                (ici faire un soft delete avec is_delete dans la db)
+
+GET		/api/boards/{id}/members
+POST	/api/boards/{id}/members
+PATCH	/api/boards/{id}/{memberId} (que le role a changer)
+DELETE	/api/boards/{id}/{memberId}
+
+POST	/api/boards/{id}/lists
+PATCH	/api/boards/{id}/lists (que le nom a changer)
+DELETE	/api/boards/{id}/lists (delete cascading)
+
+-----------------------------------------
+CARDS
+POST 	/cards
+
+GET 	/cards/{id}
+PATCH 	/cards/{id}
+DELETE	/cards/{id}
+
+GET		/cards/{id}/messages
+POST	/cards/{id}/messages
+
+GET		/cards/{id}/checklists
+POST	/cards/{id}/checklists
+
+------------------------------------------
+MESSAGES
+PATCH 	/messsages/{id} (que le text a changer)
+DELETE 	/messages/{id}
+
+-------------------------------------------
+CHECKLISTS
+PATCH	/checklists/{id}  (que le text ou "done" a changer)
+DELETE	/checklists/{id}

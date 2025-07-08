@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\BoardMember;
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -9,10 +10,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/api/user')]
+#[Route('/api/user/me')]
 final class UserController extends AbstractController
 {
-    #[Route('/me', name: 'app_user', methods: ['GET'])]
+    #[Route('', name: 'app_user', methods: ['GET'])]
     public function getMe(SerializerInterface $serializer): JsonResponse
     {
         $user = $this->getUser();
