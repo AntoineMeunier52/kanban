@@ -33,9 +33,15 @@ class Board
     #[Groups(['get_details_board'])]
     private Collection $boardMembers;
 
+    #[ORM\Column(type:'boolean', options:['default'=>false])]
+    #[Groups(['get_details_board', 'get_board'])]
+
+    private ?bool $isDeleted = false;
+
     public function __construct()
     {
         $this->boardMembers = new ArrayCollection();
+        $this->isDeleted = false;
     }
 
     public function getId(): ?int
@@ -95,6 +101,18 @@ class Board
                 $boardMember->setBoard(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isDeleted(): ?bool
+    {
+        return $this->isDeleted;
+    }
+
+    public function setIsDeleted(bool $isDeleted): static
+    {
+        $this->isDeleted = $isDeleted;
 
         return $this;
     }

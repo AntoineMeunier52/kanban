@@ -19,7 +19,7 @@ BOARD
 GET		/api/boards                 OK
 POST	/api/boards                 OK
 GET		/api/boards/{id}            OK    (give list with card)
-PATCH	/api/boards/{id}                (que le nom a changer)
+PATCH	/api/boards/{id}            OK    (que le nom a changer)
 DELETE	/api/boards/{id}                (ici faire un soft delete avec is_delete dans la db)
 
 GET		/api/boards/{id}/members

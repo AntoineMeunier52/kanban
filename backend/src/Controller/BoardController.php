@@ -15,12 +15,18 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/boards')]
 final class BoardController extends AbstractController
 {
+
+    /////////////////////////////////////////////////////////////////////////////////
+    //BOARDS
+    /////////////////////////////////////////////////////////////////////////////////
+
     #[Route(path: '', name: 'create_board', methods: ['POST'])]
     public function createBoards(
         Request $request,
@@ -91,4 +97,32 @@ final class BoardController extends AbstractController
         $jsonBoard = $serializer->serialize($board, 'json', ['groups'=>'get_details_board']);
         return new JsonResponse($jsonBoard, Response::HTTP_OK, [], true);
     }
+
+    #[Route(path: '/{id}', name: 'update_board', methods: ['PATCH'])]
+
+    public function updateBoard(
+        Board $currentBoard,
+        Request $request,
+        SerializerInterface $serializer,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['message'=> 'Not authenticated'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        if ($currentBoard->getOwner() !== $user) {
+            return new JsonResponse(['messages'=>'Forbidden'], Response::HTTP_FORBIDDEN);
+        }
+        //add validator
+        $updatedBoard = $serializer->deserialize($request->getContent(), Board::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE=>$currentBoard]);
+
+        $em->persist($updatedBoard);
+        $em->flush();
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////
+    //BOARDS - MEMBERS
+    /////////////////////////////////////////////////////////////////////////////////
 }
