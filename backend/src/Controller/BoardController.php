@@ -11,6 +11,7 @@ use App\Enum\BoardRole;
 use App\Repository\BoardMemberRepository;
 use App\Repository\BoardRepository;
 use App\Repository\UserRepository;
+use App\Security\Voter\BoardVoter;
 use App\Service\BoardService;
 use App\Utils\FormatValidatorError;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,6 +22,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -85,6 +87,7 @@ final class BoardController extends AbstractController
     }
 
     #[Route(path: '/{id}', name: 'get_board_by_id', methods: ['GET'])]
+    #[IsGranted(BoardVoter::VIEW, subject:'board')]
     public function getBoardById(
         Board $board,
         SerializerInterface $serializer,
