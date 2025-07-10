@@ -17,19 +17,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups( ['auth_registration', 'get_details_board'])]
+    #[Groups( ['auth_registration', 'get_details_board', 'get_members'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups( ['auth_registration', 'get_details_board'])]
+    #[Groups( ['auth_registration', 'get_details_board', 'get_members'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups( ['auth_registration', 'get_details_board'])]
+    #[Groups( ['auth_registration', 'get_details_board', 'get_members'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['auth_registration', 'get_details_board'])]
+    #[Groups(['auth_registration', 'get_details_board', 'get_members'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]

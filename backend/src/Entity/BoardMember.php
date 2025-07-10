@@ -18,12 +18,12 @@ class BoardMember
     private ?int $id = null;
 
     #[ORM\Column(enumType: BoardRole::class)]
-    #[Groups(['get_details_board'])]
+    #[Groups(['get_details_board', 'get_members'])]
     private BoardRole $role;
 
     #[ORM\ManyToOne(inversedBy: 'memberships')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(groups: ['get_board', 'get_details_board'])]
+    #[Groups(groups: ['get_board', 'get_details_board', 'get_members'])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'boardMembers')]

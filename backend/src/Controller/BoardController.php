@@ -2,12 +2,17 @@
 
 namespace App\Controller;
 
+use App\Dto\Board\AddMember;
 use App\Dto\Board\CreateBoard;
+use App\Dto\Board\UpdateBoard;
 use App\Entity\Board;
 use App\Entity\BoardMember;
 use App\Enum\BoardRole;
+use App\Repository\BoardMemberRepository;
+use App\Repository\BoardRepository;
+use App\Repository\UserRepository;
+use App\Service\BoardService;
 use App\Utils\FormatValidatorError;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,7 +21,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -29,7 +33,7 @@ final class BoardController extends AbstractController
     /////////////////////////////////////////////////////////////////////////////////
 
     #[Route(path: '', name: 'create_board', methods: ['POST'])]
-    public function createBoards(
+    public function createBoard(
         Request $request,
         SerializerInterface $serializer,
         EntityManagerInterface $em,
@@ -84,7 +88,16 @@ final class BoardController extends AbstractController
     public function getBoardById(
         Board $board,
         SerializerInterface $serializer,
+        BoardService $boardService
     ): JsonResponse {
+        if ($board->isDeleted()) {
+            return new JsonResponse(['message' => 'This board has been deleted'], Response::HTTP_GONE);
+        }
+
+        if (!$boardService->isMember($board, $this->getUser())) {
+            return new JsonResponse(['message'=>'Acces denied'], Response::HTTP_FORBIDDEN);
+        }
+
         $jsonBoard = $serializer->serialize($board, 'json', ['groups'=>'get_details_board']);
         return new JsonResponse($jsonBoard, Response::HTTP_OK, [], true);
     }
@@ -96,15 +109,39 @@ final class BoardController extends AbstractController
         Request $request,
         SerializerInterface $serializer,
         EntityManagerInterface $em,
-        UserInterface $user
+        UserInterface $user,
+        ValidatorInterface $validator,
+        UserRepository $userRepository
     ): JsonResponse {
         if ($currentBoard->getOwner() !== $user) {
             return new JsonResponse(['messages'=>'Forbidden'], Response::HTTP_FORBIDDEN);
         }
-        //add validator
-        $updatedBoard = $serializer->deserialize($request->getContent(), Board::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE=>$currentBoard]);
 
-        $em->persist($updatedBoard);
+        if ($currentBoard->isDeleted()) {
+            return new JsonResponse(['message' => 'This board has been deleted'], Response::HTTP_GONE);
+        }
+
+        //add validator
+        $boardDto = $serializer->deserialize($request->getContent(), UpdateBoard::class, 'json');
+
+        $errors = $validator->validate($boardDto);
+        if ($errors->count() > 0) {
+            return FormatValidatorError::sendMessages($errors);
+        }
+
+        if ($boardDto->name) {
+            $currentBoard->setName($boardDto->name);
+        }
+
+        if ($boardDto->owner) {
+            $newOwner = $userRepository->find($boardDto->owner);
+            if (!$newOwner) {
+                return new JsonResponse(['message'=> 'New owner not found'], Response::HTTP_BAD_REQUEST);
+            }
+            $currentBoard->setOwner($newOwner);
+        }
+
+        $em->persist($currentBoard);
         $em->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
@@ -129,4 +166,83 @@ final class BoardController extends AbstractController
     /////////////////////////////////////////////////////////////////////////////////
     //BOARDS - MEMBERS
     /////////////////////////////////////////////////////////////////////////////////
+
+    #[Route(path:'/{id}/members', name:'get_board_member', methods: ['GET'])]
+    public function getAllMembers(
+        Board $currentBoard,
+        BoardMemberRepository $memberRepository,
+        SerializerInterface $serializer,
+        Request $request,
+        BoardService $boardService
+    ): JsonResponse {
+        $isMember = $boardService->isMember($currentBoard, $this->getUser());
+
+        if (!$isMember) {
+            return new JsonResponse(['message'=> 'Fobidden'], Response::HTTP_FORBIDDEN);
+        }
+
+        $members = $memberRepository->findBy(['board'=>$currentBoard]);
+
+        $membersArray = array_map(function (BoardMember $memberShip) {
+            $user = $memberShip->getUser();
+            return [
+                'id' => $user->getId(),
+                'firstName' => $user->getFirstName(),
+                'LastName' => $user->getLastName(),
+                'Email' => $user->getEmail(),
+                'Role' => $memberShip->getRole()->value
+                ];
+            }, $members
+        );
+        $memberjson = $serializer->serialize($membersArray, 'json');
+        return new JsonResponse($memberjson, Response::HTTP_OK, [], true);
+    }
+
+    #[Route(path: '/{id}/members', name:'add_board_member', methods: ['POST'])]
+    public function addMembers(
+        Board $currentBoard,
+        Request $request,
+        SerializerInterface $serializer,
+        EntityManagerInterface $em,
+        BoardMemberRepository $memberRepository,
+        UserRepository $userRepository,
+        ValidatorInterface $validator
+    ): JsonResponse {
+        $new_member = $serializer->deserialize($request->getContent(), AddMember::class, 'json');
+
+        $errors = $validator->validate($new_member);
+        if (count($errors) > 0) {
+            return FormatValidatorError::sendMessages($errors);
+        }
+
+        //get instant of the new member
+        $userToAdd = $userRepository->findOneBy(['email' => $new_member->email]);
+        if (!$userToAdd) {
+            return new JsonResponse(['message'=>'User not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        //transform role request to role Enum
+        try {
+            $roleEnum = BoardRole::from(strtolower($new_member->role));
+        } catch (\ValueError) {
+            return new JsonResponse(['message'=>'Invalid role'], Response::HTTP_BAD_REQUEST);
+        }
+
+        //check if user is already member
+        foreach ($currentBoard->getBoardMembers() as $member) {
+            if ($member->getUser()->getId() === $userToAdd->getId()) {
+                return new JsonResponse(['message'=>'User already member'], Response::HTTP_CONFLICT);
+            }
+        }
+
+        $membership = new BoardMember();
+        $membership->setBoard($currentBoard);
+        $membership->setUser($userToAdd);
+        $membership->setRole($roleEnum);
+
+        $em->persist($membership);
+        $em->flush();
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
 }
