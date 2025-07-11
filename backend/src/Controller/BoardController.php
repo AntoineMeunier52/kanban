@@ -252,6 +252,8 @@ final class BoardController extends AbstractController
                 subject: 'kanban - invit'
             );
 
+            $em->persist($memberToAdd);
+            $em->flush();
             return new JsonResponse(['message'=> 'invit send successfuly'], Response::HTTP_OK);
         }
 

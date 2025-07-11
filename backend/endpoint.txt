@@ -8,6 +8,7 @@ POST	/api/auth/logout            OK
 POST	/api/auth/register          OK
 POST	/api/auth/verify-email      OK
 POST	/api/auth/resend-code       OK
+POST    /api/auth/invit
 
 ----------------------------------------
 USER

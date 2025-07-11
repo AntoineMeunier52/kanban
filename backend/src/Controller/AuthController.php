@@ -2,13 +2,15 @@
 
 namespace App\Controller;
 
+use App\Dto\Auth\InvitRequest;
 use App\Dto\Auth\RegisterRequest;
 use App\Dto\Auth\ResendCodeRequest;
 use App\Dto\Auth\VerifyEmailRequest;
+use App\Entity\BoardMember;
+use App\Repository\InvitRepository;
 use App\Repository\UserRepository;
 use App\Service\EmailSender;
 use App\Utils\FormatValidatorError;
-use App\Utils\SendEmail;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,11 +19,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authenticator\JsonLoginAuthenticator;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
@@ -185,5 +187,46 @@ final class AuthController extends AbstractController
     public function logoutSuccess(): JsonResponse
     {
         return new JsonResponse(['message' => 'Logged out successfully.'], Response::HTTP_OK);
+    }
+
+    #[Route('/invite', name: 'auth_invite', methods: ['POST'])]
+    public function invite(
+        Request $request,
+        InvitRepository $invitRepository,
+        SerializerInterface $serializer,
+        ValidatorInterface $validator,
+        UserPasswordHasherInterface $hasher,
+        EntityManagerInterface $em
+     ): JsonResponse {
+        //dd($request->getContent());
+        $invit = $serializer->deserialize($request->getContent(), InvitRequest::class, 'json');
+        $errors = $validator->validate($invit);
+        if (count($errors) > 0) {
+            return FormatValidatorError::sendMessages($errors);
+        }
+
+        $new_user = $invitRepository->findOneBy(['invitCode'=>$invit->uuid]);
+        if (!$new_user) {
+            return new JsonResponse(['message'=> 'Not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $userObj = new User();
+        $userObj->setFirstName($invit->firstName);
+        $userObj->setLastName($invit->lastName);
+        $userObj->setEmail($new_user->getEmail());
+        $userObj->setHashPassword($hasher->hashPassword($userObj, $invit->password));
+        $userObj->setIsVerified(true);
+
+        $memberObj = new BoardMember();
+        $memberObj->setBoard($new_user->getBoard());
+        $memberObj->setRole($new_user->getRole());
+        $memberObj->setUser($userObj);
+
+        $em->remove($new_user);
+        $em->persist($userObj);
+        $em->persist($memberObj);
+        $em->flush();
+
+        return new JsonResponse(['message'=> 'user create'], Response::HTTP_OK);
     }
 }
