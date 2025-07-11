@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Verify Your Email</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f8f9fa;
+                color: #212529;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                max-width: 540px;
+                margin: 40px auto;
+                padding: 30px;
+                background-color: #ffffff;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+            }
+            .code {
+                display: inline-block;
+                font-size: 28px;
+                letter-spacing: 6px;
+                font-weight: bold;
+                background-color: #e9ecef;
+                padding: 10px 20px;
+                border-radius: 6px;
+                margin-top: 20px;
+            }
+            .footer {
+                margin-top: 40px;
+                font-size: 13px;
+                color: #6c757d;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Hello 👋</h2>
+            <p>
+                You have been invited to colaborate on a
+                <strong>Kanban</strong>.
+            </p>
+            <p>To register, please follow this link</p>
+            <div class="code">
+                <a href="{{ link }}">register to <strong>Kanban</strong></a>
+            </div>
+            <div class="footer">
+                If you didn't request this email, you can ignore it.
+                <br />
+                – The Kanban Team
+            </div>
+        </div>
+    </body>
+</html>

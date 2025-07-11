@@ -38,10 +38,17 @@ class Board
 
     private ?bool $isDeleted = false;
 
+    /**
+     * @var Collection<int, Invit>
+     */
+    #[ORM\OneToMany(targetEntity: Invit::class, mappedBy: 'board', orphanRemoval: true)]
+    private Collection $invits;
+
     public function __construct()
     {
         $this->boardMembers = new ArrayCollection();
         $this->isDeleted = false;
+        $this->invits = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -113,6 +120,36 @@ class Board
     public function setIsDeleted(bool $isDeleted): static
     {
         $this->isDeleted = $isDeleted;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Invit>
+     */
+    public function getInvits(): Collection
+    {
+        return $this->invits;
+    }
+
+    public function addInvit(Invit $invit): static
+    {
+        if (!$this->invits->contains($invit)) {
+            $this->invits->add($invit);
+            $invit->setBoard($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvit(Invit $invit): static
+    {
+        if ($this->invits->removeElement($invit)) {
+            // set the owning side to null (unless already changed)
+            if ($invit->getBoard() === $this) {
+                $invit->setBoard(null);
+            }
+        }
 
         return $this;
     }

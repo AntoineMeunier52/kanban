@@ -7,12 +7,16 @@ use App\Dto\Board\CreateBoard;
 use App\Dto\Board\UpdateBoard;
 use App\Entity\Board;
 use App\Entity\BoardMember;
+use App\Entity\Invit;
+use App\Entity\User;
 use App\Enum\BoardRole;
 use App\Repository\BoardMemberRepository;
 use App\Repository\BoardRepository;
+use App\Repository\InvitRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\BoardVoter;
 use App\Service\BoardService;
+use App\Service\EmailSender;
 use App\Utils\FormatValidatorError;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,6 +28,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/boards')]
@@ -87,16 +92,12 @@ final class BoardController extends AbstractController
     }
 
     #[Route(path: '/{id}', name: 'get_board_by_id', methods: ['GET'])]
-    #[IsGranted(BoardVoter::VIEW, subject:'board')]
+    #[IsGranted(attribute: BoardVoter::VIEW, subject:'board')]
     public function getBoardById(
         Board $board,
         SerializerInterface $serializer,
         BoardService $boardService
     ): JsonResponse {
-        if ($board->isDeleted()) {
-            return new JsonResponse(['message' => 'This board has been deleted'], Response::HTTP_GONE);
-        }
-
         if (!$boardService->isMember($board, $this->getUser())) {
             return new JsonResponse(['message'=>'Acces denied'], Response::HTTP_FORBIDDEN);
         }
@@ -175,7 +176,6 @@ final class BoardController extends AbstractController
         Board $currentBoard,
         BoardMemberRepository $memberRepository,
         SerializerInterface $serializer,
-        Request $request,
         BoardService $boardService
     ): JsonResponse {
         $isMember = $boardService->isMember($currentBoard, $this->getUser());
@@ -202,6 +202,7 @@ final class BoardController extends AbstractController
     }
 
     #[Route(path: '/{id}/members', name:'add_board_member', methods: ['POST'])]
+    #[IsGranted(BoardVoter::ADMIN, subject:'currentBoard')]
     public function addMembers(
         Board $currentBoard,
         Request $request,
@@ -209,7 +210,9 @@ final class BoardController extends AbstractController
         EntityManagerInterface $em,
         BoardMemberRepository $memberRepository,
         UserRepository $userRepository,
-        ValidatorInterface $validator
+        InvitRepository $invitRepository,
+        ValidatorInterface $validator,
+        EmailSender $emailSender
     ): JsonResponse {
         $new_member = $serializer->deserialize($request->getContent(), AddMember::class, 'json');
 
@@ -218,18 +221,41 @@ final class BoardController extends AbstractController
             return FormatValidatorError::sendMessages($errors);
         }
 
-        //get instant of the new member
-        $userToAdd = $userRepository->findOneBy(['email' => $new_member->email]);
-        if (!$userToAdd) {
-            return new JsonResponse(['message'=>'User not found'], Response::HTTP_NOT_FOUND);
-        }
-
-        //transform role request to role Enum
         try {
             $roleEnum = BoardRole::from(strtolower($new_member->role));
         } catch (\ValueError) {
             return new JsonResponse(['message'=>'Invalid role'], Response::HTTP_BAD_REQUEST);
         }
+
+        //get instant of the new member
+        $userToAdd = $userRepository->findOneBy(['email' => $new_member->email]);
+        $checkInvit = $invitRepository->findOneBy(['email'=> $new_member->email]);
+
+        if ($checkInvit) {
+            return new JsonResponse(['message'=> 'Invit already send'], Response::HTTP_FORBIDDEN);
+        }
+
+        if (!$userToAdd) {
+            $uuid = Uuid::v7();
+            //ici invite du nouvelle utilisateur
+            $memberToAdd = new Invit();
+            $memberToAdd->setEmail($new_member->email);
+            $memberToAdd->setInvitCode($uuid);
+            $memberToAdd->setBoard($currentBoard);
+            $memberToAdd->setRole($roleEnum);
+
+            $emailReplacer = ['link'=>"https://127.0.0.1:8000/invit?uuid=$uuid"];
+            $emailSender->send(
+                template: 'invitEmail.html',
+                replacer: $emailReplacer,
+                sendTo: $new_member->email,
+                subject: 'kanban - invit'
+            );
+
+            return new JsonResponse(['message'=> 'invit send successfuly'], Response::HTTP_OK);
+        }
+
+        //transform role request to role Enum
 
         //check if user is already member
         foreach ($currentBoard->getBoardMembers() as $member) {
