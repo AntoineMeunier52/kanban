@@ -2,54 +2,146 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>Resend verification code</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f8f9fa;
-                color: #212529;
-                margin: 0;
-                padding: 0;
-            }
-            .container {
-                max-width: 540px;
-                margin: 40px auto;
-                padding: 30px;
-                background-color: #ffffff;
-                border-radius: 8px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
-            }
-            .code {
-                display: inline-block;
-                font-size: 28px;
-                letter-spacing: 6px;
-                font-weight: bold;
-                background-color: #e9ecef;
-                padding: 10px 20px;
-                border-radius: 6px;
-                margin-top: 20px;
-            }
-            .footer {
-                margin-top: 40px;
-                font-size: 13px;
-                color: #6c757d;
-            }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>New Verification Code - Kanban App</title>
+        <!--[if mso]>
+        <noscript>
+            <xml>
+                <o:OfficeDocumentSettings>
+                    <o:PixelsPerInch>96</o:PixelsPerInch>
+                </o:OfficeDocumentSettings>
+            </xml>
+        </noscript>
+        <![endif]-->
     </head>
-    <body>
-        <div class="container">
-            <h2>Hello {{ firstName }} 👋</h2>
-            <p>
-                Here is your new verification code for your
-                <strong>Kanban</strong> account:
-            </p>
-            <div class="code">{{ verificationCode }}</div>
-            <p>This code will expire in 15 minutes.</p>
-            <div class="footer">
-                If you didn't request this email, you can ignore it.
-                <br />
-                – The Kanban Team
-            </div>
-        </div>
+    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #faf9f5;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #faf9f5;">
+            <tr>
+                <td align="center" style="padding: 20px;">
+                    <!-- Main Container -->
+                    <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; max-width: 600px; border: 1px solid #e5e5e5;" bgcolor="#ffffff">
+                        <!-- Header -->
+                        <tr>
+                            <td style="background-color: #f0efeb; padding: 30px 40px; text-align: center; border-bottom: 1px solid #e5e5e5;" bgcolor="#f0efeb">
+                                <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #262626; font-family: Arial, sans-serif;">New Verification Code</h1>
+                            </td>
+                        </tr>
+                        
+                        <!-- Content -->
+                        <tr>
+                            <td style="padding: 40px;">
+                                <!-- Greeting -->
+                                <div style="font-size: 18px; margin-bottom: 20px; color: #262626; font-family: Arial, sans-serif;">
+                                    Hello {{ firstName }}!
+                                </div>
+
+                                <!-- Resend Notice -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f4f0; border: 1px solid #e5e5e5; margin: 20px 0;" bgcolor="#f5f4f0">
+                                    <tr>
+                                        <td style="padding: 15px; font-size: 16px; color: #525252; font-family: Arial, sans-serif;">
+                                            <strong style="color: #262626;">New code generated!</strong><br />
+                                            We've generated a fresh verification code for your Kanban
+                                            account. Your previous code has been deactivated for
+                                            security reasons.
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Message -->
+                                <div style="font-size: 16px; margin-bottom: 30px; line-height: 1.8; color: #525252; font-family: Arial, sans-serif;">
+                                    Here is your new verification code to complete your email
+                                    verification:
+                                </div>
+
+                                <!-- Code Label -->
+                                <div style="text-align: center; font-size: 14px; color: #737373; margin-bottom: 10px; font-weight: 600; font-family: Arial, sans-serif;">
+                                    Your New Verification Code
+                                </div>
+
+                                <!-- Verification Code -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0;">
+                                    <tr>
+                                        <td align="center">
+                                            <table cellpadding="0" cellspacing="0" border="0">
+                                                <tr>
+                                                    <td style="background-color: #262626; padding: 25px; text-align: center; border: 1px solid #e5e5e5;" bgcolor="#262626">
+                                                        <span style="color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: 8px; font-family: monospace;">{{ verificationCode }}</span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Security Note -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f4f0; border: 1px solid #e5e5e5; margin: 25px 0;" bgcolor="#f5f4f0">
+                                    <tr>
+                                        <td style="padding: 15px; font-size: 14px; color: #525252; font-family: Arial, sans-serif;">
+                                            <strong style="color: #262626;">Security Notice:</strong> This verification code
+                                            will expire in 15 minutes for your security. Please use it
+                                            promptly to complete your registration.
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Help Section -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f0efeb; border: 1px solid #e5e5e5; margin: 25px 0;" bgcolor="#f0efeb">
+                                    <tr>
+                                        <td style="padding: 20px; font-family: Arial, sans-serif;">
+                                            <h3 style="margin: 0 0 10px 0; color: #262626; font-size: 16px;">Having trouble?</h3>
+                                            <p style="margin: 0 0 10px 0; color: #525252; font-size: 14px;">
+                                                If you continue to experience issues with email verification:
+                                            </p>
+                                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                <tr><td style="padding: 3px 0; color: #525252; font-size: 14px;">• Make sure you're entering the code exactly as shown</td></tr>
+                                                <tr><td style="padding: 3px 0; color: #525252; font-size: 14px;">• Ensure you're using the latest code (previous ones are deactivated)</td></tr>
+                                                <tr><td style="padding: 3px 0; color: #525252; font-size: 14px;">• Contact our support team if problems persist</td></tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Features List -->
+                                <div style="font-size: 16px; margin-bottom: 30px; line-height: 1.8; color: #525252; font-family: Arial, sans-serif;">
+                                    Once verified, you'll have full access to:
+                                </div>
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 30px;">
+                                    <tr>
+                                        <td style="padding: 5px 0; color: #525252; font-size: 16px; font-family: Arial, sans-serif;">• Create and manage kanban boards</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 5px 0; color: #525252; font-size: 16px; font-family: Arial, sans-serif;">• Collaborate with your team</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 5px 0; color: #525252; font-size: 16px; font-family: Arial, sans-serif;">• Track project progress</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 5px 0; color: #525252; font-size: 16px; font-family: Arial, sans-serif;">• Organize tasks efficiently</td>
+                                    </tr>
+                                </table>
+
+                                <!-- Expiry Info -->
+                                <div style="color: #525252; font-weight: 600; font-size: 14px; text-align: center; font-family: Arial, sans-serif;">
+                                    This code expires in 15 minutes.
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Footer -->
+                        <tr>
+                            <td style="background-color: #f5f4f0; padding: 25px 40px; text-align: center; font-size: 14px; color: #737373; border-top: 1px solid #e5e5e5; font-family: Arial, sans-serif;" bgcolor="#f5f4f0">
+                                <p style="margin: 0 0 10px 0; color: #525252;">Best regards,<br />The Kanban Team</p>
+                                <p style="margin: 0 0 10px 0;">
+                                    If you didn't request this new code, please ignore this email.
+                                </p>
+                                <p style="margin: 0;">
+                                    This is an automated message, please do not reply to this email.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
     </body>
 </html>

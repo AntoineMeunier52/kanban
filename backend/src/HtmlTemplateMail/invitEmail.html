@@ -3,56 +3,139 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Verify Your Email</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f8f9fa;
-                color: #212529;
-                margin: 0;
-                padding: 0;
-            }
-            .container {
-                max-width: 540px;
-                margin: 40px auto;
-                padding: 30px;
-                background-color: #ffffff;
-                border-radius: 8px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
-            }
-            .code {
-                display: inline-block;
-                font-size: 28px;
-                letter-spacing: 6px;
-                font-weight: bold;
-                background-color: #e9ecef;
-                padding: 10px 20px;
-                border-radius: 6px;
-                margin-top: 20px;
-            }
-            .footer {
-                margin-top: 40px;
-                font-size: 13px;
-                color: #6c757d;
-            }
-        </style>
+        <title>Board Invitation - Kanban App</title>
+        <!--[if mso]>
+        <noscript>
+            <xml>
+                <o:OfficeDocumentSettings>
+                    <o:PixelsPerInch>96</o:PixelsPerInch>
+                </o:OfficeDocumentSettings>
+            </xml>
+        </noscript>
+        <![endif]-->
     </head>
-    <body>
-        <div class="container">
-            <h2>Hello 👋</h2>
-            <p>
-                You have been invited to colaborate on a
-                <strong>Kanban</strong>.
-            </p>
-            <p>To register, please follow this link</p>
-            <div class="code">
-                <a href="{{ link }}">register to <strong>Kanban</strong></a>
-            </div>
-            <div class="footer">
-                If you didn't request this email, you can ignore it.
-                <br />
-                – The Kanban Team
-            </div>
-        </div>
+    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #faf9f5;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #faf9f5;">
+            <tr>
+                <td align="center" style="padding: 20px;">
+                    <!-- Main Container -->
+                    <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; max-width: 600px; border: 1px solid #e5e5e5;" bgcolor="#ffffff">
+                        <!-- Header -->
+                        <tr>
+                            <td style="background-color: #f0efeb; padding: 30px 40px; text-align: center; border-bottom: 1px solid #e5e5e5;" bgcolor="#f0efeb">
+                                <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #262626; font-family: Arial, sans-serif;">Board Invitation</h1>
+                            </td>
+                        </tr>
+                        
+                        <!-- Content -->
+                        <tr>
+                            <td style="padding: 40px;">
+                                <!-- Greeting -->
+                                <div style="font-size: 18px; margin-bottom: 20px; color: #262626; font-family: Arial, sans-serif;">
+                                    Hello there!
+                                </div>
+
+                                <!-- Invitation Details -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f4f0; border: 1px solid #e5e5e5; margin: 25px 0;" bgcolor="#f5f4f0">
+                                    <tr>
+                                        <td style="padding: 20px; font-size: 16px; color: #525252; font-family: Arial, sans-serif;">
+                                            <strong style="color: #262626;">You've been invited to collaborate!</strong><br />
+                                            Someone has invited you to join a Kanban board and start
+                                            collaborating on exciting projects together.
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Message -->
+                                <div style="font-size: 16px; margin-bottom: 30px; line-height: 1.8; color: #525252; font-family: Arial, sans-serif;">
+                                    Kanban is a powerful project management tool that helps
+                                    teams organize, track, and complete their work efficiently.
+                                    You've been selected to be part of this collaborative
+                                    workspace!
+                                </div>
+
+                                <!-- Features List -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f0efeb; border: 1px solid #e5e5e5; margin: 20px 0;" bgcolor="#f0efeb">
+                                    <tr>
+                                        <td style="padding: 20px; font-family: Arial, sans-serif;">
+                                            <strong style="color: #262626; font-size: 16px;">What you'll be able to do:</strong>
+                                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 10px;">
+                                                <tr><td style="padding: 4px 0; color: #525252; font-size: 14px;">• Organize tasks with intuitive drag-and-drop boards</td></tr>
+                                                <tr><td style="padding: 4px 0; color: #525252; font-size: 14px;">• Collaborate in real-time with your team</td></tr>
+                                                <tr><td style="padding: 4px 0; color: #525252; font-size: 14px;">• Track project progress and deadlines</td></tr>
+                                                <tr><td style="padding: 4px 0; color: #525252; font-size: 14px;">• Manage workflows efficiently</td></tr>
+                                                <tr><td style="padding: 4px 0; color: #525252; font-size: 14px;">• Communicate with team members</td></tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- CTA Button -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0;">
+                                    <tr>
+                                        <td align="center">
+                                            <table cellpadding="0" cellspacing="0" border="0">
+                                                <tr>
+                                                    <td style="background-color: #262626; padding: 15px 30px; text-align: center; border: 1px solid #e5e5e5;" bgcolor="#262626">
+                                                        <a href="{{ link }}" style="color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px; font-family: Arial, sans-serif; display: block;">Accept Invitation & Register</a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Alternative Link -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f0efeb; border: 1px solid #e5e5e5; margin: 20px 0;" bgcolor="#f0efeb">
+                                    <tr>
+                                        <td style="padding: 15px; font-size: 12px; color: #737373; font-family: Arial, sans-serif;">
+                                            <strong style="color: #525252;">Can't click the button?</strong> Copy and paste this
+                                            link into your browser:<br />
+                                            <span style="word-break: break-all; color: #525252;">{{ link }}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Getting Started -->
+                                <div style="font-size: 16px; margin-bottom: 15px; line-height: 1.8; color: #525252; font-family: Arial, sans-serif;">
+                                    <strong style="color: #262626;">Getting started is easy:</strong>
+                                </div>
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 30px;">
+                                    <tr><td style="padding: 3px 0; color: #525252; font-size: 16px; font-family: Arial, sans-serif;">1. Click the invitation link above</td></tr>
+                                    <tr><td style="padding: 3px 0; color: #525252; font-size: 16px; font-family: Arial, sans-serif;">2. Create your account with a secure password</td></tr>
+                                    <tr><td style="padding: 3px 0; color: #525252; font-size: 16px; font-family: Arial, sans-serif;">3. Start collaborating immediately!</td></tr>
+                                </table>
+
+                                <!-- Board Info -->
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f4f0; border: 1px solid #e5e5e5; margin: 20px 0;" bgcolor="#f5f4f0">
+                                    <tr>
+                                        <td style="padding: 15px; font-family: Arial, sans-serif;">
+                                            <h3 style="margin: 0 0 10px 0; color: #262626; font-size: 16px;">Ready to boost your productivity?</h3>
+                                            <div style="color: #525252; font-size: 14px;">
+                                                Join thousands of teams who use Kanban to streamline their
+                                                workflow and achieve their goals faster.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <!-- Footer -->
+                        <tr>
+                            <td style="background-color: #f5f4f0; padding: 25px 40px; text-align: center; font-size: 14px; color: #737373; border-top: 1px solid #e5e5e5; font-family: Arial, sans-serif;" bgcolor="#f5f4f0">
+                                <p style="margin: 0 0 10px 0; color: #525252;">Best regards,<br />The Kanban Team</p>
+                                <p style="margin: 0 0 10px 0;">
+                                    If you didn't expect this invitation, you can safely ignore this email.
+                                </p>
+                                <p style="margin: 0;">
+                                    This is an automated message, please do not reply to this email.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
     </body>
 </html>

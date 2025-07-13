@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Dto\Auth\ForgotPasswordRequest;
 use App\Dto\Auth\InvitRequest;
 use App\Dto\Auth\RegisterRequest;
 use App\Dto\Auth\ResendCodeRequest;
@@ -169,6 +170,54 @@ final class AuthController extends AbstractController
         $em->flush();
 
         return new JsonResponse(['message'=> 'New verification code send'], Response::HTTP_OK);
+    }
+
+    #[Route('/forgot-password', name: 'auth_forgot_password', methods: ['POST'])]
+    public function forgotPassword(
+        Request $request,
+        SerializerInterface $serializer,
+        ValidatorInterface $validator,
+        UserRepository $userRepository,
+        EntityManagerInterface $em,
+        EmailSender $emailSender
+    ): JsonResponse
+    {
+        $forgotPasswordData = $serializer->deserialize($request->getContent(), ForgotPasswordRequest::class, 'json');
+
+        $errors = $validator->validate($forgotPasswordData);
+        if ($errors->count() > 0) {
+            return FormatValidatorError::sendMessages($errors);
+        }
+
+        $user = $userRepository->findOneBy(['email' => $forgotPasswordData->email]);
+
+        // Always return success to prevent email enumeration attacks
+        if (!$user || !$user->isVerified()) {
+            return new JsonResponse(['message' => 'If an account with this email exists, you will receive a password reset link.'], Response::HTTP_OK);
+        }
+
+        // Generate a secure reset token
+        $resetToken = bin2hex(random_bytes(32));
+        $user->setResetPasswordToken($resetToken);
+        $user->setResetPasswordExpiresAt(new DateTimeImmutable('+1 hour')); // Reset link valid for 1 hour
+
+        // Send password reset email
+        $resetLink = "http://localhost:3000/auth/reset-password?token=" . $resetToken;
+        $emailReplacer = [
+            'firstName' => $user->getFirstName(),
+            'resetLink' => $resetLink
+        ];
+
+        $emailSender->send(
+            template: 'passwordReset.html',
+            replacer: $emailReplacer,
+            sendTo: $user->getEmail(),
+            subject: 'Password Reset - Kanban App'
+        );
+
+        $em->flush();
+
+        return new JsonResponse(['message' => 'If an account with this email exists, you will receive a password reset link.'], Response::HTTP_OK);
     }
 
     #[Route('/login', name: 'auth_login', methods: ['POST'])]

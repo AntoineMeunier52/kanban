@@ -44,6 +44,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(options: ['default'=>false])]
     private ?bool $isVerified = false;
 
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $resetPasswordToken = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $resetPasswordExpiresAt = null;
+
     /**
      * @var Collection<int, BoardMember>
      */
@@ -169,6 +175,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getResetPasswordToken(): ?string
+    {
+        return $this->resetPasswordToken;
+    }
+
+    public function setResetPasswordToken(?string $resetPasswordToken): static
+    {
+        $this->resetPasswordToken = $resetPasswordToken;
+
+        return $this;
+    }
+
+    public function getResetPasswordExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->resetPasswordExpiresAt;
+    }
+
+    public function setResetPasswordExpiresAt(?\DateTimeImmutable $resetPasswordExpiresAt): static
+    {
+        $this->resetPasswordExpiresAt = $resetPasswordExpiresAt;
 
         return $this;
     }
