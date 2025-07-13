@@ -1,40 +1,51 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-
-//
 export default defineNuxtConfig({
-  compatibilityDate: "2025-05-15",
   devtools: { enabled: true },
-  modules: ["@nuxtjs/tailwindcss", "@nuxtjs/color-mode", "@nuxt/eslint"],
 
-  app: {
-    head: {
-      title: "Kanban",
-      htmlAttrs: {
-        lang: "en",
-      },
+  modules: [
+    "@nuxt/ui",
+    "@nuxt/eslint",
+    "@nuxt/fonts",
+    "@nuxt/icon",
+    "@pinia/nuxt",
+  ],
+
+  css: ["~/assets/css/main.css"],
+
+  // Configuration pour éviter les erreurs TLS en développement
+  runtimeConfig: {
+    public: {
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || "https://127.0.0.1:8000",
     },
+  },
+
+  // Configuration SSR pour éviter les problèmes de TLS
+  ssr: true,
+
+  // Configuration pour le développement
+  devServer: {
+    https: false, // Force HTTP en développement
   },
 
   nitro: {
+    // Configuration pour le développement
     devProxy: {
       "/api": {
-        target: "http://127.0.01:8000",
+        target: "https://127.0.0.1:8000",
         changeOrigin: true,
+        secure: false, // Ignore les certificats SSL auto-signés
+        ws: true,
       },
     },
-  },
-
-  colorMode: {
-    preference: "system",
-    fallback: "light",
-    classSuffix: "",
-    storage: "cookie",
-    storageKey: "color-mode",
-  },
-
-  tailwindcss: {
-    config: {
-      darkMode: "class",
+    // Désactiver HTTPS pour éviter les erreurs TLS
+    experimental: {
+      wasm: true,
     },
   },
+
+  future: {
+    compatibilityVersion: 4,
+  },
+
+  compatibilityDate: "2024-11-27",
 });
