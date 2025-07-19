@@ -1,5 +1,11 @@
 <template>
-  <button :type="props.type" :class="handleStyle">{{ props.label }}</button>
+  <button
+    :type="props.type"
+    :class="handleStyle"
+    @click="$emit('click', $event)"
+  >
+    {{ props.label }}
+  </button>
 </template>
 
 <script setup lang="ts">
@@ -17,6 +23,8 @@ const props = defineProps({
     default: "primary",
   },
 });
+
+const emit = defineEmits(["click"]);
 
 const handleStyle = computed(() => `form-button-${props.variant}`);
 </script>

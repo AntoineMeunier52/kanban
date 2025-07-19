@@ -15,3 +15,34 @@
 
   --font-stardom: "Stardom";
 }
+
+/*INPUT TEXT*/
+.input-text {
+  @apply bg-white border border-border-primary rounded w-full p-[8px] mt-[8px] mb-[8px];
+}
+
+.input-text:hover {
+  @apply border-border-solid;
+}
+
+.input-text:focus {
+  @apply border-border-solid;
+}
+
+/*PRIMARY BUTTON*/
+.form-button-primary {
+  @apply w-full h-[42px] p-[8px] bg-black text-white font-bold overflow-hidden rounded mt-[28px];
+}
+
+.form-button-primary:hover {
+  @apply bg-gradient-to-r from-black via-[#ffffff4d] to-black scale-[102%];
+}
+
+/*SECONDARY BUTTON*/
+.form-button-secondary {
+  @apply w-full h-[42px] p-[8px] bg-primary-creme border border-border-primary font-bold overflow-hidden rounded mt-[16px];
+}
+
+.form-button-secondary:hover {
+  @apply bg-solid-creme border-0;
+}
