@@ -1,9 +1,10 @@
-import type { User } from "~/types/User";
+import { useAuth } from "./useAuth";
 
 export const useAuthStore = () => {
-  const isLogin = false;
+  const auth = useAuth();
 
   return {
-    isLogin,
+    ...auth,
+    isLogin: auth.isAuthenticated,
   };
 };

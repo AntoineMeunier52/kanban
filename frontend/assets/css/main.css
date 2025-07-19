@@ -18,7 +18,7 @@
 
 /*INPUT TEXT*/
 .input-text {
-  @apply bg-white border border-border-primary rounded w-full p-[8px] mt-[8px] mb-[8px];
+  @apply bg-white border border-border-primary rounded w-full p-[8px] mt-[8px];
 }
 
 .input-text:hover {
