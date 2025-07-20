@@ -10,7 +10,9 @@
         <input
           v-for="n in length"
           :key="n"
-          @keyup="(e) => handleEnter(e, n - 1)"
+          @keydown="(e) => handleKeydown(e, n - 1)"
+          @input="(e) => handleInput(e, n - 1)"
+          @paste="(e) => onPaste(e, n - 1)"
           v-model="otpArray[n - 1]"
           type="text"
           maxlength="1"
@@ -33,30 +35,66 @@ const length = 6;
 
 const error = ref("");
 
-function handleEnter(e: KeyboardEvent, i: number) {
+function handleKeydown(e: KeyboardEvent, i: number) {
   const children = otpContainer.value.children;
   const keypressed = e.key;
 
   clearBorderError();
 
-  if (i > 0 && (keypressed === "Backspace" || keypressed === "Delete")) {
-    otpArray.value[i] = "";
-    setTimeout(() => {
-      children[i - 1].focus();
-    }, 50);
-  } else {
-    const matched = keypressed.match(/^[0-9]$/);
-    if (!matched) {
-      otpArray.value[i] = "";
-      return;
-    } else if (i < length - 1) {
-      setTimeout(() => {
-        children[i + 1].focus();
-      }, 50);
+  // Gestion Ctrl+V / Cmd+V
+  if ((e.ctrlKey || e.metaKey) && keypressed === "v") {
+    // Laisser l'événement paste se déclencher naturellement
+    return;
+  }
+
+  if (keypressed === "Backspace" || keypressed === "Delete") {
+    if (otpArray.value[i] === "" && i > 0) {
+      e.preventDefault();
+      otpArray.value[i - 1] = "";
+      nextTick(() => {
+        children[i - 1].focus();
+      });
     }
+  } else if (keypressed === "ArrowLeft" && i > 0) {
+    e.preventDefault();
+    nextTick(() => {
+      children[i - 1].focus();
+    });
+  } else if (keypressed === "ArrowRight" && i < length - 1) {
+    e.preventDefault();
+    nextTick(() => {
+      children[i + 1].focus();
+    });
+  } else if (keypressed.match(/^[0-9]$/)) {
+    e.preventDefault();
+    otpArray.value[i] = keypressed;
+    if (i < length - 1) {
+      nextTick(() => {
+        children[i + 1].focus();
+      });
+    }
+  } else if (!["Tab", "Shift", "Control", "Meta", "Alt"].includes(keypressed)) {
+    e.preventDefault();
   }
 
   error.value = "";
+}
+
+function handleInput(e: Event, i: number) {
+  const target = e.target as HTMLInputElement;
+  const value = target.value;
+  
+  if (!value.match(/^[0-9]$/)) {
+    otpArray.value[i] = "";
+    return;
+  }
+  
+  if (value && i < length - 1) {
+    const children = otpContainer.value.children;
+    nextTick(() => {
+      children[i + 1].focus();
+    });
+  }
 }
 
 function handleCheck() {
@@ -74,6 +112,33 @@ function handleCheck() {
     error.value = "Enter all the digits";
     return;
   }
+}
+
+function onPaste(e: ClipboardEvent, startIndex: number) {
+  e.preventDefault();
+  
+  const pasteData = e.clipboardData?.getData('text') || '';
+  const numbers = pasteData.replace(/\D/g, '');
+  
+  if (numbers.length === 0) return;
+  
+  const children = otpContainer.value.children;
+  let currentIndex = startIndex;
+  
+  for (let i = 0; i < numbers.length && currentIndex < length; i++) {
+    otpArray.value[currentIndex] = numbers[i];
+    currentIndex++;
+  }
+  
+  nextTick(() => {
+    if (currentIndex < length) {
+      children[currentIndex].focus();
+    } else {
+      children[length - 1].focus();
+    }
+  });
+  
+  error.value = "";
 }
 
 function clearBorderError() {
