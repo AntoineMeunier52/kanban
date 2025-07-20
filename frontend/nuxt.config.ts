@@ -8,7 +8,18 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://127.0.0.1:8000",
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || "https://127.0.0.1:8000",
+    },
+  },
+
+  nitro: {
+    devProxy: {
+      "^/api/.*": {
+        target: "https://127.0.0.1:8000",
+        changeOrigin: true,
+        //prependPath: true,
+        secure: false,
+      },
     },
   },
 

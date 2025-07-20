@@ -1,18 +1,23 @@
 <template>
   <div>
     <form @submit.prevent="handleSignIn">
-      <p>Email</p>
+      <ErrorBox :error="error" />
+      <label for="email">Email</label>
       <input
         v-model="email"
+        type="text"
         placeholder="Enter your email"
+        name="email"
         class="input-text mb-[8px]"
         :class="emailError ? 'border !border-red-500' : ''"
       />
       <p class="signin-error">{{ emailError }}</p>
-      <p>Password</p>
+      <label for="password">Password</label>
       <input
         v-model="password"
+        type="password"
         placeholder="Enter your password"
+        name="password"
         class="input-text mb-[8px]"
         :class="passwordError ? 'border !border-red-500' : ''"
       />
@@ -20,7 +25,13 @@
       <a class="sign-in-forgot" href="/auth/forgot-password"
         >Forgot your password?</a
       >
-      <button type="submit" class="form-button-primary">Sign In</button>
+      <button type="submit" class="form-button-primary">
+        <span v-if="!auth.isLoading">
+          <Icon name="i-heroicons-arrow-path" class="w-4 h-4 animate-spin" />
+          Signing In...
+        </span>
+        <span v-else> Sign in</span>
+      </button>
     </form>
   </div>
 </template>
@@ -32,9 +43,24 @@ const password = ref("");
 const emailError = ref<string | null>(null);
 const passwordError = ref<string | null>(null);
 
-function handleSignIn() {
+const error = ref("");
+
+const auth = useAuth();
+
+async function handleSignIn() {
+  error.value = "";
   emailError.value = validator("email", email.value, "Email");
   passwordError.value = validator("password", password.value, "Password", 8);
+
+  if (emailError.value || passwordError.value) return;
+
+  const data = await auth.login(email.value, password.value);
+  console.log(data);
+  if (!data.success) {
+    error.value = data.error;
+    return;
+  }
+  return navigateTo("/");
 }
 </script>
 

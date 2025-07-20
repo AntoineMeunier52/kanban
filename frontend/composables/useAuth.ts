@@ -7,8 +7,8 @@ export const useAuth = () => {
 
   const login = async (email: string, password: string) => {
     isLoading.value = true;
-    const { data, error } = await api.post("/auth", {
-      username: email,
+    const { data, error } = await api.post("/api/auth/login", {
+      email,
       password,
     });
     isLoading.value = false;
