@@ -74,7 +74,11 @@ watch([() => email.value, () => password.value], () => {
   if (auth.error) {
     auth.clearError();
   }
+  emailError.value = "";
+  passwordError.value = "";
 });
+
+onUnmounted(() => auth.clearError());
 </script>
 
 <style scoped>
