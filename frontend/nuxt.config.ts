@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-  modules: ["@nuxt/fonts", "@nuxt/icon", "@nuxtjs/color-mode"],
+  modules: ["@nuxt/fonts", "@nuxt/icon", "@nuxtjs/color-mode", "@pinia/nuxt"],
 
   runtimeConfig: {
     public: {
@@ -13,12 +13,12 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    // Configuration pour le développement
     devProxy: {
-      "^/api/.*": {
+      "/api": {
         target: "https://127.0.0.1:8000",
         changeOrigin: true,
-        //prependPath: true,
-        secure: false,
+        secure: false, // Ignore les certificats SSL auto-signés
       },
     },
   },
@@ -33,11 +33,7 @@ export default defineNuxtConfig({
     preference: "light",
     fallback: "light",
     storage: "cookie",
-  },
-
-  icon: {
-    mode: "css",
-    cssLayer: "base",
+    classSuffix: "",
   },
 
   fonts: {

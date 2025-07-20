@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="sign-in-container">
     <form @submit.prevent="handleSignIn">
-      <ErrorBox :error="error" />
+      <ErrorBox :error="auth.error" />
       <label for="email">Email</label>
       <input
         v-model="email"
@@ -26,7 +26,7 @@
         >Forgot your password?</a
       >
       <button type="submit" class="form-button-primary">
-        <span v-if="!auth.isLoading">
+        <span v-if="auth.isLoading">
           <Icon name="i-heroicons-arrow-path" class="w-4 h-4 animate-spin" />
           Signing In...
         </span>
@@ -37,6 +37,8 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from "~/store/auth";
+
 const email = ref("");
 const password = ref("");
 
@@ -45,7 +47,9 @@ const passwordError = ref<string | null>(null);
 
 const error = ref("");
 
-const auth = useAuth();
+//const auth = useAuth();
+const auth = useAuthStore();
+const router = useRouter();
 
 async function handleSignIn() {
   error.value = "";
@@ -54,18 +58,31 @@ async function handleSignIn() {
 
   if (emailError.value || passwordError.value) return;
 
-  const data = await auth.login(email.value, password.value);
-  console.log(data);
-  if (!data.success) {
-    error.value = data.error;
-    return;
+  const data = await auth.login({
+    email: email.value,
+    password: password.value,
+  });
+
+  if (data.success) {
+    setTimeout(() => {
+      router.push("/");
+    }, 800);
   }
-  return navigateTo("/");
 }
+
+watch([() => email.value, () => password.value], () => {
+  if (auth.error) {
+    auth.clearError();
+  }
+});
 </script>
 
 <style scoped>
 @reference "../../assets/css/main.css";
+
+.sign-in-container {
+  @apply text-text-primary;
+}
 
 .sign-in-forgot {
   @apply text-[14px] text-text-secondary underline;

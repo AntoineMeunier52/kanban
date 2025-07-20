@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="sign-up-container">
     <form>
       <div class="signup-name-container">
         <TextInput
@@ -37,6 +37,12 @@ const password = ref("");
 </script>
 
 <style scoped>
+@reference "../../assets/css/main.css";
+
+.sign-up-container {
+  @apply text-text-primary;
+}
+
 .signup-name-container {
   @apply flex gap-[8px] justify-between mb-[16px];
 }

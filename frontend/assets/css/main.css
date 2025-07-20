@@ -6,6 +6,8 @@
   --color-solid-creme: #f0eee6;
   --color-solid2-creme: #e8e6dc;
   --color-accent-primary: #b09300;
+  --color-white: #fff;
+  --color-black: #000;
 
   --color-text-primary: #3d3d3a;
   --color-text-secondary: #73726c;
@@ -14,6 +16,22 @@
   --color-border-solid: #1f1e1d;
 
   --font-stardom: "Stardom";
+}
+
+:root.dark {
+  --color-primary-creme: #1a1a1a;
+  --color-secondary-creme: #2a2a2a;
+  --color-solid-creme: #3a3a3a;
+  --color-solid2-creme: #4a4a4a;
+  --color-accent-primary: #d4af37;
+  --color-white: #363636;
+  --color-black: #cdcccc;
+
+  --color-text-primary: #e5e5e5;
+  --color-text-secondary: #a3a3a3;
+
+  --color-border-primary: #ffffff4d;
+  --color-border-solid: #ffffff;
 }
 
 /*INPUT TEXT*/

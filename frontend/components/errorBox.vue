@@ -6,11 +6,9 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
-  error: {
-    type: String,
-  },
-});
+const props = defineProps<{
+  error: string | null;
+}>();
 </script>
 
 <style scoped>
