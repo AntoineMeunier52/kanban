@@ -126,11 +126,10 @@ export const useAuthStore = defineStore("auth", () => {
   ): Promise<{ success: boolean; error?: string }> {
     isLoading.value = true;
     error.value = null;
-    console.log(verifyBody);
 
     try {
       const response = await $fetch<LoginResponse>(
-        `${baseURL}/api/auth/register`,
+        `${baseURL}/api/auth/verify-email`,
         {
           method: "POST",
           headers: {

@@ -1,6 +1,6 @@
 <template>
   <div v-if="props.error" class="error-box-container">
-    <Icon name="i-lucide-triangle-alert" class="error-box-icon" />
+    <Icon name="i-lucide-alert-triangle" class="error-box-icon" />
     <p>{{ props.error }}</p>
   </div>
 </template>

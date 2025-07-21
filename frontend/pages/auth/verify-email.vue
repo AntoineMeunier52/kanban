@@ -6,6 +6,7 @@
         Verify your email now by checking your inbox!<br />
         We've sent you a code.
       </p>
+      <ErrorBox :error="auth.error" />
       <div class="verify-otp" ref="otpContainer">
         <input
           v-for="n in length"
@@ -20,7 +21,11 @@
           class="verify-otp-input"
         />
       </div>
-      <p v-if="error" class="verify-error">{{ error }}</p>
+      <p v-if="otpError" class="verify-error">{{ otpError }}</p>
+      <a class="verify-dont" @click="resendCode"
+        >Don't received the code?
+        <span class="verify-dont-link">Resend it!</span></a
+      >
       <button class="form-button-primary" @click="handleCheck">
         Verify Email
       </button>
@@ -29,11 +34,25 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from "~/store/auth";
+
 const otpContainer = ref();
 const otpArray = ref<string[]>([]);
 const length = 6;
 
-const error = ref("");
+const otpError = ref("");
+
+const route = useRoute();
+
+const email = computed(() => {
+  const value = route.query.email;
+  if (Array.isArray(value)) return value[0] || null;
+  return value || null;
+});
+
+const router = useRouter();
+
+const auth = useAuthStore();
 
 function handleKeydown(e: KeyboardEvent, i: number) {
   const children = otpContainer.value.children;
@@ -47,6 +66,7 @@ function handleKeydown(e: KeyboardEvent, i: number) {
     return;
   }
 
+  //delete number
   if (keypressed === "Backspace" || keypressed === "Delete") {
     if (otpArray.value[i] === "" && i > 0) {
       e.preventDefault();
@@ -55,6 +75,7 @@ function handleKeydown(e: KeyboardEvent, i: number) {
         children[i - 1].focus();
       });
     }
+    //navigate into the input
   } else if (keypressed === "ArrowLeft" && i > 0) {
     e.preventDefault();
     nextTick(() => {
@@ -65,6 +86,7 @@ function handleKeydown(e: KeyboardEvent, i: number) {
     nextTick(() => {
       children[i + 1].focus();
     });
+    //get only number
   } else if (keypressed.match(/^[0-9]$/)) {
     e.preventDefault();
     otpArray.value[i] = keypressed;
@@ -77,18 +99,18 @@ function handleKeydown(e: KeyboardEvent, i: number) {
     e.preventDefault();
   }
 
-  error.value = "";
+  otpError.value = "";
 }
 
 function handleInput(e: Event, i: number) {
   const target = e.target as HTMLInputElement;
   const value = target.value;
-  
+
   if (!value.match(/^[0-9]$/)) {
     otpArray.value[i] = "";
     return;
   }
-  
+
   if (value && i < length - 1) {
     const children = otpContainer.value.children;
     nextTick(() => {
@@ -97,7 +119,7 @@ function handleInput(e: Event, i: number) {
   }
 }
 
-function handleCheck() {
+async function handleCheck() {
   const children: HTMLInputElement[] = otpContainer.value.children;
   let errorCheck = false;
 
@@ -109,27 +131,38 @@ function handleCheck() {
     }
   }
   if (errorCheck) {
-    error.value = "Enter all the digits";
+    otpError.value = "Enter all the digits";
     return;
+  }
+
+  const data = await auth.verifyEmail({
+    email: email.value,
+    code: otpArray.value.join(""),
+  });
+
+  if (data.success) {
+    setTimeout(() => {
+      router.push("/");
+    }, 800);
   }
 }
 
 function onPaste(e: ClipboardEvent, startIndex: number) {
   e.preventDefault();
-  
-  const pasteData = e.clipboardData?.getData('text') || '';
-  const numbers = pasteData.replace(/\D/g, '');
-  
+
+  const pasteData = e.clipboardData?.getData("text") || "";
+  const numbers = pasteData.replace(/\D/g, "");
+
   if (numbers.length === 0) return;
-  
+
   const children = otpContainer.value.children;
   let currentIndex = startIndex;
-  
+
   for (let i = 0; i < numbers.length && currentIndex < length; i++) {
     otpArray.value[currentIndex] = numbers[i];
     currentIndex++;
   }
-  
+
   nextTick(() => {
     if (currentIndex < length) {
       children[currentIndex].focus();
@@ -137,8 +170,8 @@ function onPaste(e: ClipboardEvent, startIndex: number) {
       children[length - 1].focus();
     }
   });
-  
-  error.value = "";
+
+  otpError.value = "";
 }
 
 function clearBorderError() {
@@ -146,6 +179,10 @@ function clearBorderError() {
   for (let i = 0; i < length; i++) {
     children[i].classList.remove("!border-red-500");
   }
+}
+
+function resendCode() {
+  console.log("resend");
 }
 </script>
 
@@ -186,5 +223,17 @@ function clearBorderError() {
 
 .verify-error {
   @apply text-red-500 text-[14px] pl-[8px];
+}
+
+.verify-dont {
+  @apply text-[14px] text-text-secondary ml-[8px];
+}
+
+.verify-dont-link {
+  @apply underline;
+}
+
+.verify-dont-link:hover {
+  @apply text-accent-primary;
 }
 </style>

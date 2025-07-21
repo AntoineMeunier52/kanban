@@ -95,7 +95,10 @@ async function signup() {
 
   if (data.success) {
     setTimeout(() => {
-      router.push("/verify-email");
+      router.push({
+        path: "/auth/verify-email",
+        query: { email: email.value },
+      });
     }, 800);
   }
 }
