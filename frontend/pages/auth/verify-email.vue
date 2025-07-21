@@ -7,6 +7,11 @@
         We've sent you a code.
       </p>
       <ErrorBox :error="auth.error" />
+      <InfoBox
+        :message="successMessage"
+        :show-timer="showTimer"
+        :duration="7"
+      />
       <div class="verify-otp" ref="otpContainer">
         <input
           v-for="n in length"
@@ -22,10 +27,14 @@
         />
       </div>
       <p v-if="otpError" class="verify-error">{{ otpError }}</p>
-      <a class="verify-dont" @click="resendCode"
-        >Don't received the code?
-        <span class="verify-dont-link">Resend it!</span></a
+      <button
+        v-if="!showTimer"
+        class="resend-button"
+        @click="handleResend"
+        :disabled="isResending"
       >
+        {{ isResending ? "Sending..." : "Don't received the code? Resend it!" }}
+      </button>
       <button class="form-button-primary" @click="handleCheck">
         Verify Email
       </button>
@@ -41,6 +50,9 @@ const otpArray = ref<string[]>([]);
 const length = 6;
 
 const otpError = ref("");
+const successMessage = ref<string | null>(null);
+const showTimer = ref(false);
+const isResending = ref(false);
 
 const route = useRoute();
 
@@ -181,8 +193,29 @@ function clearBorderError() {
   }
 }
 
-function resendCode() {
-  console.log("resend");
+async function handleResend() {
+  if (!email.value) {
+    otpError.value = "Email not found";
+    return;
+  }
+
+  isResending.value = true;
+  const result = await auth.resendVerificationEmail(email.value);
+
+  if (result.success) {
+    successMessage.value = "Verification email sent successfully!";
+    showTimer.value = true;
+
+    // Cacher le message après la durée spécifiée (7 secondes)
+    setTimeout(() => {
+      successMessage.value = null;
+      showTimer.value = false;
+    }, 7000);
+  } else {
+    otpError.value = result.error || "Failed to send verification email";
+  }
+
+  isResending.value = false;
 }
 </script>
 
@@ -190,7 +223,7 @@ function resendCode() {
 @reference "../../assets/css/main.css";
 
 .auth-wrapper {
-  @apply flex justify-center w-full h-full;
+  @apply flex justify-center w-full h-full text-text-primary;
 }
 
 .auth-container {
@@ -235,5 +268,9 @@ function resendCode() {
 
 .verify-dont-link:hover {
   @apply text-accent-primary;
+}
+
+.resend-button {
+  @apply pl-[8px] text-[14px] text-text-secondary bg-transparent border-none underline cursor-pointer mb-[16px] hover:text-accent-primary disabled:opacity-50 disabled:cursor-not-allowed;
 }
 </style>

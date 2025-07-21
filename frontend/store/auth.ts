@@ -207,6 +207,38 @@ export const useAuthStore = defineStore("auth", () => {
     error.value = null;
   }
 
+  async function resendVerificationEmail(email: string) {
+    isLoading.value = true;
+    error.value = null;
+
+    try {
+      await $fetch(`${baseURL}/api/auth/resend-code`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+        credentials: "include",
+      });
+
+      return { success: true };
+    } catch (err: unknown) {
+      const errorMessage =
+        err &&
+        typeof err === "object" &&
+        "data" in err &&
+        err.data &&
+        typeof err.data === "object" &&
+        "message" in err.data
+          ? (err.data as { message: string }).message
+          : "An error occurred while resending verification email";
+      error.value = errorMessage;
+      return { success: false, error: errorMessage };
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   return {
     user,
     isLoading,
@@ -218,5 +250,6 @@ export const useAuthStore = defineStore("auth", () => {
     register,
     clearError,
     verifyEmail,
+    resendVerificationEmail,
   };
 });
